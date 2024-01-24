@@ -1,36 +1,30 @@
-const tabs = await chrome.tabs.query({
-    url: [
-      "https://developer.chrome.com/docs/webstore/*",
-      "https://developer.chrome.com/docs/extensions/*",
-    ],
-});
-const collator = new Intl.Collator();
-tabs.sort((a, b) => collator.compare(a.title, b.title));
+//create list of workspaces
+const workspaces = [
+    {title: "COMP 1805", 
+    tabs: ["https://brightspace.carleton.ca/d2l/home/234943", 
+    "https://docs.google.com/document/d/1J530dmHuQhE4BAWQhGftIn1V3AAEs-b47jLnXIw7Hcg/edit#heading=h.hcmv2u9u7zze"]},
+    {title: "CLCV 1002", tabs: ["https://brightspace.carleton.ca/d2l/home/220841", 
+    "https://docs.google.com/document/d/1dY6oHAaxK0V68atQ6qEjnlZNUSD7gbhYzRoBHIhJk8E/edit#heading=h.hcmv2u9u7zze"]}
+];
 
-const template = document.getElementById("li_template");
+const template = document.getElementById("workspace_template");
 const elements = new Set();
-for (const tab of tabs) {
+for (const workspace of workspaces) {
   const element = template.content.firstElementChild.cloneNode(true);
 
-  const title = tab.title.split("-")[0].trim();
-  const pathname = new URL(tab.url).pathname.slice("/docs".length);
+  const title = workspace.title.trim();
+  const tabs = workspace.tabs;
 
-  element.querySelector(".title").textContent = title;
-  element.querySelector(".pathname").textContent = pathname;
-  element.querySelector("a").addEventListener("click", async () => {
+  const buttonElement = element.querySelector(".workspace_button")
+
+  buttonElement.innerText = title;
+  buttonElement.addEventListener("click", async () => {
     // need to focus window as well as the active tab
-    await chrome.tabs.update(tab.id, { active: true });
-    await chrome.windows.update(tab.windowId, { focused: true });
+    for (const tab of tabs) {
+        await chrome.tabs.create({ url: tab });
+    }
   });
-
   elements.add(element);
 }
+
 document.querySelector("ul").append(...elements);
-const button = document.querySelector("button");
-button.addEventListener("click", async () => {
-  const tabIds = tabs.map(({ id }) => id);
-  if (tabIds.length) {
-    const group = await chrome.tabs.group({ tabIds });
-    await chrome.tabGroups.update(group, { title: "DOCS" });
-  }
-});
