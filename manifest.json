@@ -3,10 +3,7 @@
     "name": "Hello Extension",
     "version": "1.0",
     "permissions": [
-        "tabGroups"
-    ],
-    "host_permissions": [
-        "https://developer.chrome.com/*"
+        "tabs"
     ],
     "action": {
         "default_popup": "popup/popup.html",
