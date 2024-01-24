@@ -1,12 +1,14 @@
 {
     "manifest_version": 3,
-    "name": "Hello Extension",
+    "name": "Chrome Workspaces",
     "version": "1.0",
     "permissions": [
+        "storage",
         "tabs"
     ],
     "action": {
         "default_popup": "popup/popup.html",
         "default_icon": "resources/images/hello_extension.png"
-    }
+    },
+    "options_page": "options/options.html"
 }
