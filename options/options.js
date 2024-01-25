@@ -4,20 +4,35 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector(".add_button").addEventListener("click", async () => {
         addWorkspace();
       });
+      document.querySelector(".tab_button").addEventListener("click", async () => {
+        addTabInput();
+      });
     chrome.storage.sync.get({ workspaces: [] }, function (result) {
       const existingWorkspaces = result.workspaces;
       displayWorkspaces(existingWorkspaces);
     });
   });
   
+function addTabInput() {
+  const tabsContainer = document.getElementById('tabsContainer');
+  const newTabInput = document.createElement('div');
+  newTabInput.classList.add('tabInput');
+
+  const inputNumber = document.querySelectorAll('.tabInput').length + 1;
+  newTabInput.innerHTML = `<label for="url${inputNumber}">Tab URL:</label>
+    <input type="text" class="tabUrl" name="url${inputNumber}" required>`;
+
+    tabsContainer.appendChild(newTabInput);
+  }
+
+  // Add workspace function for the options page
   function addWorkspace() {
     // Get user input
     const title = document.getElementById('title').value.trim();
-    const url1 = document.getElementById('url1').value.trim();
-    const url2 = document.getElementById('url2').value.trim();
+    const tabUrls = Array.from(document.querySelectorAll('.tabUrl')).map(input => input.value.trim());
   
     // Validate input
-    if (!title || !url1 || !url2) {
+    if (!title || tabUrls.some(url => !url)) {
       alert('Please fill in all fields');
       return;
     }
@@ -25,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Create workspace object
     const newWorkspace = {
       title: title,
-      tabs: [url1, url2],
+      tabs: tabUrls,
     };
   
     // Retrieve existing workspaces from storage
@@ -44,8 +59,15 @@ document.addEventListener('DOMContentLoaded', function () {
   
     // Clear input fields
     document.getElementById('title').value = '';
-    document.getElementById('url1').value = '';
-    document.getElementById('url2').value = '';
+  
+    // Remove added tab inputs
+    const tabsContainer = document.getElementById('tabsContainer');
+    while (tabsContainer.firstChild) {
+      tabsContainer.removeChild(tabsContainer.firstChild);
+    }
+  
+    // Add a new empty tab input
+    addTabInput();
   }
   
   function displayWorkspaces(workspaces) {
@@ -65,4 +87,35 @@ document.addEventListener('DOMContentLoaded', function () {
       document.body.appendChild(workspaceList);
     }
   }
+
+// Display workspaces function
+function displayWorkspaces(workspaces) {
+  const workspaceList = document.createElement('ul');
+
+  workspaces.forEach(function (workspace) {
+    const workspaceItem = document.createElement('li');
+    const buttonElement = document.createElement('button');
+    buttonElement.className = 'workspace_button';
+    buttonElement.innerText = workspace.title;
+
+    buttonElement.addEventListener("click", async () => {
+      // Open tabs for the clicked workspace
+      for (const tab of workspace.tabs) {
+        await chrome.tabs.create({ url: tab });
+      }
+    });
+
+    workspaceItem.appendChild(buttonElement);
+    workspaceList.appendChild(workspaceItem);
+  });
+
+  // Replace the content of the options page with the updated workspace list
+  const existingList = document.querySelector('ul');
+  if (existingList) {
+    document.body.replaceChild(workspaceList, existingList);
+  } else {
+    document.body.appendChild(workspaceList);
+  }
+}
+
   
