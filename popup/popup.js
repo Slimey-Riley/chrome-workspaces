@@ -1,7 +1,7 @@
 // Access workspaces from Chrome storage
 chrome.storage.sync.get({ workspaces: [] }, function (result) {
+    // chrome.storage.sync.clear();
     const storedWorkspaces = result.workspaces;
-  
     const template = document.getElementById("workspace_template");
     const elements = new Set();
   
@@ -9,17 +9,25 @@ chrome.storage.sync.get({ workspaces: [] }, function (result) {
       const element = template.content.firstElementChild.cloneNode(true);
   
       const title = workspace.title.trim();
-      const tabs = workspace.tabs;
+      const groups = workspace.groups;
   
       const buttonElement = element.querySelector(".workspace_button");
   
       // Set button text to workspace title
       buttonElement.innerText = title;
-  
       buttonElement.addEventListener("click", async () => {
-        // Open tabs for the clicked workspace
-        for (const tab of tabs) {
-          await chrome.tabs.create({ url: tab });
+        console.log("Button clicked");
+        console.log(groups.length);
+        for (const group of groups) {
+          // Create a Tab Group for each group
+          const tabIds = [];
+          // Open tabs in the Tab Group
+          for (const tab of group.tabs) {
+            const ba = await chrome.tabs.create({ url: tab });
+            tabIds.push(ba.id);
+          }
+          var groupId = await chrome.tabs.group({tabIds: tabIds});
+          chrome.tabGroups.update(groupId, { collapsed: false, title: "title", color: "blue" });
         }
       });
   

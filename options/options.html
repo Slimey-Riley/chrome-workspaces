@@ -11,15 +11,22 @@
   <form id="workspaceForm">
     <label for="title">Title:</label>
     <input type="text" id="title" name="title" required>
-
-    <div id="tabsContainer">
-      <div class="tabInput">
-        <label for="url1">Tab URL:</label>
-        <input type="text" class="tabUrl" name="url1" required>
+    <template id="group_template">
+      <div class="GroupContainer">
+        <label for="group_title">Title:</label>
+        <input type="text" id="group_title" name="group_title" required>
+        <button type="button" class="tab_button">Add Tab</button>
+        <div class = "tabsContainer"></div>
       </div>
-    </div>
-
-    <button type="button" class="tab_button"">Add Tab</button>
+    </template>
+    <template id="tab_template">
+      <div class="tabInput">
+        <label for="url">Tab URL:</label>
+        <input type="text" class="tabUrl" name="url" required>
+      </div>
+    </template>
+    <ol></ol>
+    <button type="button" class="group_button">Add Group</button>
 
     <button type="button" class="add_button">Add Workspace</button>
   </form>

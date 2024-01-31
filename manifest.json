@@ -4,7 +4,8 @@
     "version": "1.0",
     "permissions": [
         "storage",
-        "tabs"
+        "tabs",
+        "tabGroups"
     ],
     "action": {
         "default_popup": "popup/popup.html",
