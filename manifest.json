@@ -9,7 +9,7 @@
     ],
     "action": {
         "default_popup": "popup/popup.html",
-        "default_icon": "resources/images/hello_extension.png"
+        "default_icon": "resources/images/chromeworkspaceicon64x64.png"
     },
     "options_page": "options/options.html"
 }

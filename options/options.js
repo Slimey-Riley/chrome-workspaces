@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector(".group_button").addEventListener("click", async () => {
       addGroup();
     });
+    document.querySelector(".reset_button").addEventListener("click", async () => {
+      chrome.storage.sync.clear();
+      this.location.reload();
+    });
   chrome.storage.sync.get({ workspaces: [] }, function (result) {
     const existingWorkspaces = result.workspaces;
     displayWorkspaces(existingWorkspaces);
