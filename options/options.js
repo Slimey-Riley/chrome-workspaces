@@ -1,22 +1,9 @@
-// options.js
+// Loads relevent content
 document.addEventListener('DOMContentLoaded', function () {
-  // Retrieve existing workspaces from storage and display them
-  document.querySelector(".add_button").addEventListener("click", async () => {
-      addWorkspace();
-    });
-    document.querySelector(".group_button").addEventListener("click", async () => {
-      addGroup();
-    });
-    document.querySelector(".reset_button").addEventListener("click", async () => {
-      chrome.storage.sync.clear();
-      this.location.reload();
-    });
-  chrome.storage.sync.get({ workspaces: [] }, function (result) {
-    const existingWorkspaces = result.workspaces;
-    displayWorkspaces(existingWorkspaces);
-  });
+  initialisePage();
 });
- 
+
+// Creates a new input area for adding a group
 function addGroup() {
   const template = document.getElementById("group_template");
   const element = template.content.firstElementChild.cloneNode(true);
@@ -26,58 +13,83 @@ function addGroup() {
   document.querySelector("ol").append(element)
 }
 
+// Creates a new input area for adding a tab
 function addTabInput(tabsContainer) {
   const newTabInput = document.createElement('div');
   newTabInput.classList.add('tabInput');
 
+  // Track tab number
   const inputNumber = document.querySelectorAll('.tabInput').length + 1;
   newTabInput.innerHTML = `<label for="url${inputNumber}">Tab URL:</label>
     <input type="text" class="tabUrl" name="url${inputNumber}" required>`;
-
   tabsContainer.appendChild(newTabInput);
 }
 
 // Add workspace function for the options page
-function addWorkspace() {
+async function addWorkspace() {
   // Get user input
   const title = document.getElementById('title').value.trim();
+
+  // Collect all the groups into an array
   const groups = [];
   for(const groupContainer of Array.from(document.querySelectorAll('.GroupContainer'))) {
+    // Create new group object
     const group = {
-      tabs: Array.from(groupContainer.querySelectorAll('.tabUrl')).map(input => input.value.trim())
+      tabs: Array.from(groupContainer.querySelectorAll('.tabUrl')).map(input => input.value.trim()),
+      title: groupContainer.querySelector('.group_title').value.trim()
     };
     groups.push(group);
   }
   
   // Validate input
   if (!title) {
-    alert('Please fill in all fields');
+    alert('Please fill in title field');
     return;
   }
 
-  // Create workspace objectAA
+  // Create workspace object
   const newWorkspace = {
     title: title,
     groups: groups,
   };
 
-  // Retrieve existing workspaces from storage
-  chrome.storage.sync.get({ workspaces: [] }, function (result) {
+  // Retrieve existing workspaces from storage and save
+  await chrome.storage.sync.get({ workspaces: [] }, function (result) {
     const existingWorkspaces = result.workspaces;
-
-    // Add the new workspace
     existingWorkspaces.push(newWorkspace);
 
     // Save updated workspaces to storage
-    chrome.storage.sync.set({ workspaces: existingWorkspaces }, function () {
-      // Display updated workspaces
-      displayWorkspaces(existingWorkspaces);
-    });
+    chrome.storage.sync.set({ workspaces: existingWorkspaces });
+  });
+  
+  // Clean page
+  this.location.reload();
+}
+
+// Initilises the page
+async function initialisePage() {
+  // Initialise all buttons
+  document.querySelector(".add_button").addEventListener("click", async () => {
+    addWorkspace();
+  });
+  document.querySelector(".group_button").addEventListener("click", async () => {
+    addGroup();
+  });
+  document.querySelector(".reset_button").addEventListener("click", async () => {
+    await chrome.storage.sync.clear();
+    this.location.reload();
+  });
+
+  // Display existing workspaces
+  await chrome.storage.sync.get({ workspaces: [] }, function (result) {
+    const existingWorkspaces = result.workspaces;
+    displayWorkspaces(existingWorkspaces);
   });
 }
-  
+
+// Displays specified workspaces
 function displayWorkspaces(workspaces) {
-  // Display existing workspaces in a list or any other way you prefer
+  // Display existing workspaces in a list
   const workspaceList = document.createElement('ul');
   workspaces.forEach(function (workspace) {
     const workspaceItem = document.createElement('li');
